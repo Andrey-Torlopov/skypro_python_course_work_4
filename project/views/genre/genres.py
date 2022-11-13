@@ -3,7 +3,7 @@ from flask_restx import Namespace, Resource
 from project.container import genre_service
 from project.setup.api.models import genre
 from project.setup.api.parsers import page_parser
-
+from project.dao.model.genre import GenreScheme
 api = Namespace('genres')
 
 
@@ -15,7 +15,8 @@ class GenresView(Resource):
         """
         Get all genres.
         """
-        return genre_service.get_all(**page_parser.parse_args())
+        models = genre_service.get_all(**page_parser.parse_args())
+        return GenreScheme(many=True).dump(models), 200
 
 
 @api.route('/<int:genre_id>/')
@@ -26,4 +27,5 @@ class GenreView(Resource):
         """
         Get genre by id.
         """
-        return genre_service.get_item(genre_id)
+        model = genre_service.get_item(genre_id)
+        return GenreScheme().dump(model), 200

@@ -23,6 +23,7 @@ class BaseConfig:
     RESTX_JSON = {
         'ensure_ascii': False,
     }
+    PWD_HASH_ALGO = 'HS256'
 
 
 class TestingConfig(BaseConfig):
