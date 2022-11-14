@@ -1,8 +1,10 @@
+from typing import Optional
+from flask import current_app, request
+
 import base64
 import hashlib
 import jwt
-
-from flask import current_app, request
+import hmac
 
 
 def auth_required(func):
@@ -37,5 +39,12 @@ def generate_password_hash(password: str) -> str:
 def validate_token(token: str) -> None:
     jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=[current_app.config["PWD_HASH_ALGO"]])
 
+def get_email_from_token(token) -> Optional[str]:
+    data = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=[current_app.config["PWD_HASH_ALGO"]])
+    return data.get('email')
 
-# TODO: [security] Описать функцию compose_passwords(password_hash: Union[str, bytes], password: str)
+
+def compare_passwords(password_hash, other_password_hash) -> bool:
+    decoded_digest = base64.b64decode(password_hash)
+    other_decoded_password = base64.b64decode(other_password_hash)
+    return hmac.compare_digest(decoded_digest, other_decoded_password)

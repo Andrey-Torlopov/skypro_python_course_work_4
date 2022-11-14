@@ -13,21 +13,14 @@ class LoginView(Resource):
         req_json = request.json
         email = req_json.get('email')
         password = req_json.get('password')
-        print(request.headers)
         if None in [email, password]:
             abort(401)
 
-        try:
-            tokens = auth_service.auth_user(email, password)
-            print(f"tokens:  {tokens}")
-            return tokens, 201
-        except Exception as e:
-            abort(403)
+        return auth_service.auth_user(email, password)
 
     def put(self):
         req_json = request.json
         refresh_token = req_json.get('refresh_token')
-        print(refresh_token)
         if refresh_token is None:
             abort(401)
 
@@ -48,11 +41,7 @@ class RegisterView(Resource):
 
         user_service.create(data)
 
-        data = {
-            'email': email,
-            'password': password
-        }
-        tokens = auth_service.get_tokens(data)
+        tokens = auth_service.auth_user(email=email, password=password)
 
         if not tokens:
             return {"error": "Ошибка в логине или пароле"} , 401

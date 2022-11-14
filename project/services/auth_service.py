@@ -26,7 +26,7 @@ class AuthService:
         if user.password != generate_password_hash(password):
             return {"error": "Пароли не совпадают"}, 401
 
-        return self._generate_token(email)
+        return self._generate_token(email), 201
 
 
     def refresh_token(self, refresh_token: str):
@@ -45,12 +45,6 @@ class AuthService:
             return {"error": "Bad request"}, 400
 
         return self._generate_token(user.email)
-
-
-    def compare_passwords(self, password_hash, other_password_hash) -> bool:
-        decoded_digest = base64.b64decode(password_hash)
-        other_decoded_password = base64.b64decode(other_password_hash)
-        return hmac.compare_digest(decoded_digest, other_decoded_password)
 
     # Private
 
@@ -71,5 +65,4 @@ class AuthService:
 
     def _jwt_encode_data(self, data: dict[str, str]) -> dict[str, str]:
         token = jwt.encode(data, current_app.config["SECRET_KEY"], current_app.config["PWD_HASH_ALGO"])
-        print("<<< 111")
         return token

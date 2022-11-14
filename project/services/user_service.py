@@ -7,7 +7,7 @@ from project.exceptions import ItemNotFound
 from project.dao.model.user import User
 from project.config import config
 
-from project.tools.security import generate_password_hash
+from project.tools.security import generate_password_hash, compare_passwords
 
 class UserService:
     def __init__(self, dao: BaseDAO) -> None:
@@ -48,21 +48,26 @@ class UserService:
     def get_user_by_email(self, email: str):
         return self.dao.get_user_by_email(email)
 
-    def patch(self, data):
-        user  = self.get_one(data['id'])
+    def  patch(self, data):
+        self.dao.update(data)
 
+    def update_password(self, data: dict[str, str]):
+        old_password = data.get('old_password')
+        new_password = data.get('new_password')
+        uid = data.get('id')
+
+        if None in [old_password, new_password, uid]:
+            return  {'error': 'Not enough data'}, 401
+
+        user = self.dao.get_by_id(uid)
         if user is None:
-            return
+            return {'error': 'User not found'}, 401
 
-        if data.get('name'):
-            user.name = data.get('name')
+        old_password_hash = generate_password_hash(old_password)
 
-        if data.get('email'):
-            user.email = data.get('email')
+        if compare_passwords(user.password, old_password_hash) == False:
+            return {'error': 'Password is incorrect'}, 401
 
-        if data.get('surname'):
-            user.surname = data.get('surname')
-
-    def update_password(self, data):
-        ...
+        new_hashed_password = generate_password_hash(new_password)
+        self.dao.update_password(uid, new_hashed_password)
 

@@ -28,3 +28,13 @@ class UserDAO(BaseDAO[User]):
 
     def get_user_by_email(self, email: str):
         return self._db_session.query(User).filter(User.email == email).first()
+
+    def update_password(self, uid: int, password):
+        user = self.get_by_id(uid)
+        if len(password) == 0:
+            return
+        if user:
+            user.password = password
+
+        self._db_session.add(user)
+        self._db_session.commit()
